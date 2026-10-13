@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f8fafc" />
+
+    <title>Offline Photo Print Studio</title>
+
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/print.css" />
+
+    <!-- Use a local copy for fully offline operation -->
+    <script src="lib/jspdf.umd.min.js" defer></script>
+    <script src="js/app.js" defer></script>
+  </head>
+
+  <body>
+    <div class="app-shell">
+      <!-- Header -->
+      <header class="topbar">
+        <a href="#" class="brand">
+          <div class="brand-icon">▣</div>
+          <div>
+            <h1>Photo Print Studio</h1>
+            <p>Print your photos easily</p>
+          </div>
+        </a>
+
+        <div class="header-actions">
+          <button class="btn btn-secondary" id="saveProjectBtn">
+            Save Project
+          </button>
+
+          <button class="btn btn-secondary" id="loadProjectBtn">
+            Load Project
+          </button>
+
+          <button class="btn btn-danger" id="clearDataBtn">Clear Data</button>
+
+          <input
+            type="file"
+            id="projectFileInput"
+            accept=".json,application/json"
+            hidden
+          />
+        </div>
+      </header>
+
+      <!-- Main Layout -->
+      <div class="workspace">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+          <nav class="sidebar-nav" aria-label="Main navigation">
+            <a href="#home" class="nav-item active"> <span>⌂</span> Home </a>
+
+            <a href="#photo-list" class="nav-item">
+              <span>▧</span> My Photos
+            </a>
+
+            <a href="#photo-settings" class="nav-item">
+              <span>⚙</span> Settings
+            </a>
+          </nav>
+
+          <div class="offline-status">
+            <span class="status-dot"></span>
+            <div>
+              <strong>Offline Ready</strong>
+              <p>No internet required</p>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" id="home">
+          <!-- Upload Panel -->
+          <section class="panel upload-panel" aria-labelledby="uploadHeading">
+            <div class="section-heading">
+              <span class="step-number">1</span>
+              <h2 id="uploadHeading">Upload Photos</h2>
+            </div>
+
+            <label class="upload-dropzone" id="uploadDropzone">
+              <input
+                type="file"
+                id="photoInput"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                hidden
+              />
+
+              <span class="upload-icon" aria-hidden="true">⇧</span>
+              <strong>Click to upload or drag and drop</strong>
+              <span>JPG, PNG, WEBP</span>
+              <span class="muted-text">Select multiple photos at once</span>
+            </label>
+
+            <div class="photo-toolbar">
+              <span id="photoCount">0 photos selected</span>
+              <button type="button" class="text-button" id="addMorePhotosBtn">
+                + Add More
+              </button>
+            </div>
+
+            <div class="thumbnail-grid" id="thumbnailGrid">
+              <div class="empty-state" id="emptyPhotoState">
+                <span aria-hidden="true">▧</span>
+                <p>Your photos will appear here.</p>
+              </div>
+            </div>
+
+            <p class="help-text">Tip: Drag photos to reorder them.</p>
+          </section>
+
+          <!-- Settings Panel -->
+          <section class="settings-column">
+            <!-- Photo Settings -->
+            <section
+              class="panel settings-panel"
+              id="photo-settings"
+              aria-labelledby="photoSettingsHeading"
+            >
+              <div class="section-heading">
+                <span class="step-number">2</span>
+                <h2 id="photoSettingsHeading">Photo Settings</h2>
+              </div>
+
+              <div class="form-group">
+                <label for="photoPreset">Photo Size</label>
+                <select id="photoPreset">
+                  <option value="passport">Passport (35 × 45 mm)</option>
+                  <option value="square">Square ID (25 × 25 mm)</option>
+                  <option value="stamp">Stamp Photo</option>
+                  <option value="visa">Visa Photo</option>
+                  <option value="custom">Custom Size</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Custom Size (mm)</label>
+
+                <div class="input-row">
+                  <div>
+                    <label class="visually-hidden" for="photoWidth">
+                      Photo width in millimeters
+                    </label>
+                    <input
+                      type="number"
+                      id="photoWidth"
+                      min="1"
+                      max="210"
+                      value="35"
+                      placeholder="Width"
+                    />
+                  </div>
+
+                  <span class="dimension-separator">×</span>
+
+                  <div>
+                    <label class="visually-hidden" for="photoHeight">
+                      Photo height in millimeters
+                    </label>
+                    <input
+                      type="number"
+                      id="photoHeight"
+                      min="1"
+                      max="297"
+                      value="45"
+                      placeholder="Height"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="defaultCopies">Default Copies per Photo</label>
+                <div class="number-control">
+                  <button
+                    type="button"
+                    class="number-btn"
+                    id="decreaseCopiesBtn"
+                    aria-label="Decrease copies"
+                  >
+                    −
+                  </button>
+
+                  <input
+                    type="number"
+                    id="defaultCopies"
+                    min="1"
+                    max="500"
+                    value="4"
+                  />
+
+                  <button
+                    type="button"
+                    class="number-btn"
+                    id="increaseCopiesBtn"
+                    aria-label="Increase copies"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              <p class="help-text">
+                You can change the copy count for each photo below.
+              </p>
+            </section>
+
+            <!-- Paper Settings -->
+            <section
+              class="panel settings-panel"
+              aria-labelledby="paperSettingsHeading"
+            >
+              <div class="section-heading">
+                <span class="step-number">3</span>
+                <h2 id="paperSettingsHeading">Paper Settings</h2>
+              </div>
+
+              <div class="form-group">
+                <label for="paperSize">Paper Size</label>
+                <select id="paperSize">
+                  <option value="a4">A4 (210 × 297 mm)</option>
+                  <option value="a5">A5 (148 × 210 mm)</option>
+                  <option value="4r">4R (102 × 152 mm)</option>
+                  <option value="5r">5R (127 × 178 mm)</option>
+                  <option value="6r">6R (152 × 203 mm)</option>
+                  <option value="custom">Custom Paper</option>
+                </select>
+              </div>
+
+              <div class="form-group" id="customPaperGroup" hidden>
+                <label>Custom Paper (mm)</label>
+                <div class="input-row">
+                  <input
+                    type="number"
+                    id="paperWidth"
+                    min="1"
+                    value="210"
+                    placeholder="Width"
+                    aria-label="Custom paper width in millimeters"
+                  />
+                  <span class="dimension-separator">×</span>
+                  <input
+                    type="number"
+                    id="paperHeight"
+                    min="1"
+                    value="297"
+                    placeholder="Height"
+                    aria-label="Custom paper height in millimeters"
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Orientation</label>
+                <div class="orientation-options">
+                  <label class="orientation-option">
+                    <input
+                      type="radio"
+                      name="orientation"
+                      value="portrait"
+                      checked
+                    />
+                    <span>▯ Portrait</span>
+                  </label>
+
+                  <label class="orientation-option">
+                    <input type="radio" name="orientation" value="landscape" />
+                    <span>▱ Landscape</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="margin">Page Margin (mm)</label>
+                <input type="number" id="margin" min="0" max="50" value="10" />
+              </div>
+
+              <div class="form-group">
+                <label for="spacing">Photo Spacing (mm)</label>
+                <input type="number" id="spacing" min="0" max="20" value="5" />
+              </div>
+
+              <div class="form-group">
+                <label for="maxPerRow">Maximum Photos per Row</label>
+                <select id="maxPerRow">
+                  <option value="5" selected>5 photos</option>
+                  <option value="4">4 photos</option>
+                  <option value="3">3 photos</option>
+                  <option value="2">2 photos</option>
+                  <option value="1">1 photo</option>
+                </select>
+              </div>
+
+              <label class="checkbox-option">
+                <input type="checkbox" id="showCutLines" />
+                <span>Show cutting guides</span>
+              </label>
+
+              <button
+                type="button"
+                class="btn btn-primary btn-full"
+                id="generatePreviewBtn"
+              >
+                Generate Preview
+              </button>
+            </section>
+          </section>
+
+          <!-- Preview Panel -->
+          <section class="panel preview-panel" aria-labelledby="previewHeading">
+            <div class="preview-toolbar">
+              <h2 id="previewHeading">Print Preview</h2>
+
+              <select id="previewPaperSize" aria-label="Preview paper size">
+                <option value="a4">A4 · Portrait</option>
+                <option value="a5">A5 · Portrait</option>
+                <option value="4r">4R · Portrait</option>
+                <option value="5r">5R · Portrait</option>
+                <option value="6r">6R · Portrait</option>
+                <option value="custom">Custom Paper</option>
+              </select>
+            </div>
+
+            <div class="page-navigation">
+              <button
+                type="button"
+                class="icon-button"
+                id="previousPageBtn"
+                aria-label="Previous page"
+                disabled
+              >
+                ‹
+              </button>
+
+              <span id="pageIndicator">Page 0 of 0</span>
+
+              <button
+                type="button"
+                class="icon-button"
+                id="nextPageBtn"
+                aria-label="Next page"
+                disabled
+              >
+                ›
+              </button>
+            </div>
+
+            <div class="zoom-controls">
+              <button
+                type="button"
+                class="icon-button"
+                id="zoomOutBtn"
+                aria-label="Zoom out"
+              >
+                −
+              </button>
+
+              <span id="zoomLevel">100%</span>
+
+              <button
+                type="button"
+                class="icon-button"
+                id="zoomInBtn"
+                aria-label="Zoom in"
+              >
+                +
+              </button>
+            </div>
+
+            <div class="preview-viewport" id="previewViewport">
+              <div
+                class="print-page"
+                id="printPage"
+                aria-label="Printable page preview"
+              >
+                <div class="preview-empty-state" id="previewEmptyState">
+                  <span aria-hidden="true">▤</span>
+                  <p>Upload photos to generate your print layout.</p>
+                </div>
+              </div>
+            </div>
+
+            <p class="preview-note">
+              Preview is scaled to fit your screen. Use PDF at 100% scale for
+              accurate physical dimensions.
+            </p>
+
+            <div class="preview-actions">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                id="printPreviewBtn"
+              >
+                Print Preview
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-danger-outline"
+                id="downloadPdfBtn"
+              >
+                Download PDF
+              </button>
+
+              <button type="button" class="btn btn-success" id="printBtn">
+                Print
+              </button>
+            </div>
+          </section>
+
+          <!-- Photo List and Summary -->
+          <aside class="details-column">
+            <section class="panel summary-panel">
+              <h2>Print Summary</h2>
+
+              <dl class="summary-list">
+                <div>
+                  <dt>Total Photos</dt>
+                  <dd id="summaryTotalPhotos">0</dd>
+                </div>
+
+                <div>
+                  <dt>Pages Required</dt>
+                  <dd id="summaryPages">0</dd>
+                </div>
+
+                <div>
+                  <dt>Photo Size</dt>
+                  <dd id="summaryPhotoSize">35 × 45 mm</dd>
+                </div>
+
+                <div>
+                  <dt>Paper Size</dt>
+                  <dd id="summaryPaperSize">A4 (210 × 297 mm)</dd>
+                </div>
+
+                <div>
+                  <dt>Orientation</dt>
+                  <dd id="summaryOrientation">Portrait</dd>
+                </div>
+              </dl>
+            </section>
+
+            <section class="panel photo-list-panel" id="photo-list">
+              <div class="list-heading">
+                <h2>Photo List</h2>
+                <span id="photoListCount">0</span>
+              </div>
+
+              <div id="photoList" class="photo-list">
+                <div class="empty-state">
+                  <p>No photos added yet.</p>
+                </div>
+              </div>
+            </section>
+          </aside>
+        </main>
+      </div>
+
+      <!-- Status / Notifications -->
+      <div
+        class="toast-container"
+        id="toastContainer"
+        aria-live="polite"
+        aria-atomic="true"
+      ></div>
+
+      <footer class="app-footer">
+        <p>
+          Offline Photo Print Studio
+          <span>·</span>
+          Your photos stay on your device.
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>
