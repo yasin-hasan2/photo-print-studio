@@ -1,0 +1,277 @@
+/* =========================================
+   Offline Photo Print Studio
+   Accurate Browser Printing
+   File: css/print.css
+========================================= */
+
+/*
+  IMPORTANT:
+  - Keep all physical dimensions in millimeters.
+  - The JavaScript layout engine should position
+    photos using actual mm measurements.
+  - Select "Actual Size" or "100%" in the
+    browser's print dialog.
+*/
+
+/* ---------- 1. Print Page Defaults ---------- */
+
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+/* ---------- 2. Print Color and Background ---------- */
+
+html,
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #ffffff !important;
+  color: #000000 !important;
+
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* ---------- 3. Hide Application UI ---------- */
+
+@media print {
+  body {
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+
+  .app-shell {
+    width: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .topbar,
+  .sidebar,
+  .upload-panel,
+  .settings-column,
+  .details-column,
+  .app-footer,
+  .toast-container,
+  .preview-toolbar,
+  .page-navigation,
+  .zoom-controls,
+  .preview-note,
+  .preview-actions {
+    display: none !important;
+  }
+
+  .workspace,
+  .main-content {
+    display: block !important;
+    width: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+  }
+
+  .preview-panel {
+    display: block !important;
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+
+    overflow: visible !important;
+
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+  }
+
+  .preview-viewport {
+    display: block !important;
+
+    width: auto !important;
+    min-height: 0 !important;
+    height: auto !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    overflow: visible !important;
+
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+  }
+
+  /* ---------- 4. Physical Page ---------- */
+
+  .print-page {
+    position: relative !important;
+
+    display: block !important;
+
+    width: 210mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+
+    box-sizing: border-box !important;
+    padding: 0 !important;
+    margin: 0 !important;
+
+    overflow: hidden !important;
+
+    background: #ffffff !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+
+    transform: none !important;
+    zoom: 1 !important;
+
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .print-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  /* ---------- 5. Photo Dimensions ---------- */
+
+  .preview-photo {
+    position: absolute !important;
+
+    display: block !important;
+
+    max-width: none !important;
+    max-height: none !important;
+
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    visibility: visible !important;
+    opacity: 1 !important;
+
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /*
+    The layout engine must set:
+      left:     position in mm
+      top:      position in mm
+      width:    photo width in mm
+      height:   photo height in mm
+
+    Avoid setting width: 100% or height: auto
+    here because that can change the physical size.
+  */
+
+  /* ---------- 6. Cutting Guides ---------- */
+
+  .preview-photo.cut-guides {
+    outline: 0.15mm dashed #777777 !important;
+    outline-offset: 0 !important;
+  }
+
+  /*
+    Outlines are visual guides only.
+    For more reliable trimming, the JS layout
+    engine may draw dedicated cut-mark elements.
+  */
+
+  .cut-mark {
+    position: absolute !important;
+
+    display: block !important;
+
+    background: #555555 !important;
+    opacity: 0.8 !important;
+
+    pointer-events: none !important;
+  }
+
+  /* ---------- 7. Empty Preview ---------- */
+
+  .preview-empty-state {
+    display: none !important;
+  }
+
+  /* ---------- 8. Avoid Unwanted Breaks ---------- */
+
+  img,
+  .preview-photo {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}
+
+/* ---------- 9. Optional Paper Presets ---------- */
+
+/*
+  Change the paper preset class on <body>
+  or another root element before printing.
+
+  Example:
+    document.body.dataset.paper = "4r";
+    document.body.dataset.orientation = "portrait";
+
+  The JS print manager must also set the correct
+  @page size before opening the print dialog.
+*/
+
+@page a4-portrait {
+  size: 210mm 297mm;
+  margin: 0;
+}
+
+@page a4-landscape {
+  size: 297mm 210mm;
+  margin: 0;
+}
+
+@page a5-portrait {
+  size: 148mm 210mm;
+  margin: 0;
+}
+
+@page a5-landscape {
+  size: 210mm 148mm;
+  margin: 0;
+}
+
+@page photo-4r {
+  size: 102mm 152mm;
+  margin: 0;
+}
+
+@page photo-5r {
+  size: 127mm 178mm;
+  margin: 0;
+}
+
+@page photo-6r {
+  size: 152mm 203mm;
+  margin: 0;
+}
+
+/*
+  NOTE:
+  Named page sizes only work when the printable
+  element is assigned the matching page property.
+
+  The JS print manager will need to set the page
+  name and page dimensions for each paper preset.
+*/
